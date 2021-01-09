@@ -78,10 +78,10 @@ namespace inject
 
             Console.WriteLine("Solution Name:"+solutionName+" Domain Name:"+domainName+" EOD creation Date is:"+eodCreationDate);
 
-            const string source_directory = @"C:\\Program Files\\Cerner\\";
-            const string backup = @"C:\\Program Files\\Cerner\\backup\\";
-            const string senderfile = @"C:\\Program Files\\Cerner\\ATSsender.dll";
-            const string log_file = @"C:\\ATS\\SBIlog.txt";
+            const string source_directory = @""; //add the directory path of dll to be injected
+            const string backup = @""; //add directory path location to create back up of dll
+            const string senderfile = @"";//add dll file that needs to be referenced.This can be a dll that runs your own code.
+            const string log_file = @"";//log file path
             
             string json;
             string sourcefile;
@@ -97,20 +97,7 @@ namespace inject
             //call the service and get the json with data of files to be injected
             using (TimeoutWebClient wc = new TimeoutWebClient())
             {
-                //json = wc.DownloadString("https://ats.cerner.com:8443/solutioninfo/getSolutionData?solutionName=PathNet -- Anatomic Pathology&domain=SOLM64&eodCreationDate=02-06-2020 00:00:00.000");
-                json = wc.DownloadString("https://ats.cerner.com:8443/solutioninfo/getSolutionData?solutionName="+solutionName+"&domain="+domainName+"&eodCreationDate="+eodCreationDate+ "&isMerged=true");
-                /*
-                if ("PathNet -- Anatomic Pathology".Equals(solutionName))
-                {
-                    json = File.ReadAllText("C:\\ATS\\Injector\\anatomic_pathology.json");
-                }
-                else if("Person Management".Equals(solutionName)) {
-                    json = File.ReadAllText("C:\\ATS\\Injector\\person_management.json");
-                }
-                else {
-                    json = File.ReadAllText("C:\\ATS\\Injector\\anatomic_pathology.json");
-                }
-                */
+                json = wc.DownloadString(""); // This block just downloads a file containg method names which need to be injected.
             }
             RootObject r = JsonConvert.DeserializeObject<RootObject>(json);
 
@@ -145,14 +132,14 @@ namespace inject
                 if (File.Exists(sourcefile))
                 {
                     //create backup of the source DLL
-                    File.Copy(sourcefile, backup + Path.GetFileName(source)); // handle exception dude to this folder and files inside // after coping the dll is renamed with diffrent casing
+                    File.Copy(sourcefile, backup + Path.GetFileName(source)); // handle exception dude to this folder and files inside // after coping the dll is renamed with diffrent casing.
 
                     //load DLL reference
                     AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(sourcefile, new ReaderParameters { ReadWrite = true, AssemblyResolver = resolver });
                     var module = assembly.MainModule;
                     TypeDefinition[] types = module.GetTypes().ToArray();
 
-                    foreach (Files dll in projects.files)
+                    foreach (Files dll in projects.files) // this loop is used to inject the dll reference in the start of a method and pass the method name and the varible name and type used in the method.
                     {
                         foreach (class_name clas in dll.classes)
                         {
